@@ -1,8 +1,8 @@
 name: Enforce Branch Naming Convention
 
 on:
-  push:
-    types: [opened, synchronize, reopened]
+ push:
+    branches: [ '**' ]
 
 jobs:
   check_branch_name:
