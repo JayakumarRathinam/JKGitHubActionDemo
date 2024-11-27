@@ -1,7 +1,7 @@
 name: Enforce Branch Naming Convention
 
 on:
-  pull_request:
+  push:
     types: [opened, synchronize, reopened]
 
 jobs:
