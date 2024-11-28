@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Check branch name
         run: |
-          branch_name=$(echo "${{ github.head_ref }}" | sed 's/refs\/heads\///')
+          branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           echo "Branch name: $branch_name"
           if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
             echo "Error: Branch name '$branch_name' does not match the naming convention."
