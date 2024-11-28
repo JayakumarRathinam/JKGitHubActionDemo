@@ -1,9 +1,8 @@
 name: Enforce Branch Naming Convention
 
 on:
- pull_request:
- push:
-    branches: [ '**' ]
+  create:
+    branches: [main]
 
 jobs:
   check_branch_name:
