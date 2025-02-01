@@ -17,9 +17,8 @@ jobs:
           branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           
           echo "Branch Name: $branch_name"
-          
-          #if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
-          if [[ ! "$branch_name" =~ ^(r|fb|hb|us)[0-9]+[-a-z]$ ]]; then          
+
+          if [[ ! "$branch_name" =~ ^(r|fb|hb|us)[0-9]+[-a-z]+$ ]]; then          
             echo "❌ Error: Branch name '$branch_name' does not match the naming convention."
               git push origin --delete $branch_name
               exit 1
