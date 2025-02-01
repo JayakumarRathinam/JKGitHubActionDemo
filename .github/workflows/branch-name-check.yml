@@ -8,7 +8,10 @@ jobs:
   check_branch_name:
     runs-on: ubuntu-latest
     steps:
-      - name: Check branch name
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Check branch name & Delete if not in Standard
         run: |
           branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           echo "Branch name: $branch_name"
