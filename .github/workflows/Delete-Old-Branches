@@ -1,0 +1,41 @@
+name: Delete Old Branches
+
+#on:
+#  schedule:
+#    - cron: '0 0 * * *' # Runs daily at midnight UTC
+
+jobs:
+  delete-old-branches:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Important: Grants permission to delete branches
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Important: Fetch all branches and tags
+
+      - name: Get Old Branches
+        id: old_branches
+        run: |
+          OLD_BRANCHES=$(git for-each-ref --format='%(refname:short) %(committerdate:relative)' refs/remotes/origin | awk '$2 ~ /month[s]? ago/ {print $1}')
+          echo "old_branches=$OLD_BRANCHES" >> $GITHUB_OUTPUT
+
+      - name: Delete Old Branches (Dry Run)
+        if: github.ref == 'refs/heads/main' # Only run on your main branch (or a designated branch)
+        run: |
+          echo "Deleting (Dry Run):"
+          for branch in ${{ steps.old_branches.outputs.old_branches }}; do
+            echo "git push origin --delete $branch"  # Dry run: shows what would be deleted
+          done
+          echo "If the above looks correct, remove the 'echo' before 'git push' to actually delete."
+
+      - name: Delete Old Branches (Actual Delete - Use with extreme caution!)
+        if: github.ref == 'refs/heads/main' && needs.delete-old-branches.outputs.old_branches != '' # Only run on your main branch
+        # Add a manual approval step for extra safety
+        # needs: approval
+        run: |
+          echo "Deleting (Actual):"
+          for branch in ${{ steps.old_branches.outputs.old_branches }}; do
+            git push origin --delete $branch
+          done
