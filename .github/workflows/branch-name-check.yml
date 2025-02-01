@@ -14,5 +14,6 @@ jobs:
           echo "Branch name: $branch_name"
           if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
             echo "Error: Branch name '$branch_name' does not match the naming convention."
+            git push origin --delete $branch_name
             exit 1
           fi
