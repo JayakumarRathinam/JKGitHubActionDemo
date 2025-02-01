@@ -18,5 +18,7 @@ jobs:
           if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
             echo "Error: Branch name '$branch_name' does not match the naming convention. So its deleted automatically"
             git push origin --delete $branch_name
+            env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             exit 1
           fi
