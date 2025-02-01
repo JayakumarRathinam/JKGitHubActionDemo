@@ -9,14 +9,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensures full history        
+          
       - name: Check branch name & Delete if not in Standard
         run: >
           branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-
-          echo "Branch name: $branch_name"
-
+          echo "❌ Deleting invalid branch: $branch_name"
           if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
             echo "Error: Branch name '$branch_name' does not match the naming convention. So its deleted automatically"
+            git branch -D "$branch_name" || echo "⚠️ Failed to delete $branch_name"
             git push origin --delete $branch_name
             env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
