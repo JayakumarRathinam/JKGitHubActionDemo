@@ -16,10 +16,12 @@ jobs:
         run: >
           branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           
-          echo "❌ Deleting invalid branch: $branch_name"
+          echo "Branch Name: $branch_name"
           
           if [[ ! "$branch_name" =~ ^(feature|bugfix|hotfix|release|chore)\/[a-z0-9-]+$ ]]; then
-            echo "✅ Error: Branch name '$branch_name' does not match the naming convention. So its deleted automatically"
-            git push origin --delete $branch_name
-            exit 1
+            echo "❌ Error: Branch name '$branch_name' does not match the naming convention. So its deleted automatically"
+              git push origin --delete $branch_name
+              exit 1
+            else
+              echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
           fi
