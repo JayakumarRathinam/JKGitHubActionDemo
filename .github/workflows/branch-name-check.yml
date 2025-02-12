@@ -1,6 +1,6 @@
 ---
 name: Enforce Branch Naming Convention
-on:
+#on:
   #create:
   #  branches: ['*']
 jobs:
