@@ -15,8 +15,6 @@ jobs:
 
   branch-naming-policy:
     needs [workflow-trigger]
-    strategy:
-      fail-fast: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
