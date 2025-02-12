@@ -27,9 +27,9 @@ jobs:
           fetch-depth: 0
       - name: Check branch name & Delete if not in Standard
         run: >
-          branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///') echo
-          "Branch Name: $branch_name" if [[ ! "$branch_name" =~
-          ^(r|fb|hb|us)[0-9]+[-a-z]+$ ]]; then          
+          branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///') 
+          echo "Branch Name: $branch_name" 
+          if [[ ! "$branch_name" =~ ^(r|fb|hb|us)[0-9]+[-a-z]+$ ]]; then  
             echo "❌ Error: Branch name '$branch_name' does not match the naming convention."
               git push origin --delete $branch_name
               exit 1
