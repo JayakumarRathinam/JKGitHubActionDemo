@@ -38,36 +38,26 @@ jobs:
           fi
   check-label:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request_review' || github.event.review.state !=
-      'submitted' || github.event.review.state != 'approved'
     steps:
-      - name: Check for Required Label
-        id: check_label
-        uses: actions/github-script@v6
-        with:
-          script: >
-            const requiredLabel = 'your-required-label'; // Replace with your actual
-            label
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            const labels = context.payload.pull_request.labels.map(label => label.name);
+      - name: Get PR number
+        id: pr_number
+        run: echo "::set-output name=number::$(echo "$GITHUB_REF" | cut -d '/' -f 3)"
 
+      - name: Get PR labels
+        id: get_pr_labels
+        run: |
+          labels=$(gh api --jq '.labels.[].name' /repos/${{ github.repository }}/pulls/${{ steps.pr_number.outputs.number }})
+          echo "::set-output name=labels::$labels"
 
-            if (!labels.includes(requiredLabel)) {
-              core.setFailed(`Pull Request must have the '${requiredLabel}' label.`);
-            }
-      - name: Add a comment if label is missing
-        if: steps.check_label.outcome == 'failure'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: >
-            const issue_number = context.issue.number;
-
-            const comment = `This PR requires the '${{ steps.check_label.outcome }}' label. Please add it to proceed with the merge.`;
-
-            await github.rest.issues.createComment({
-              issue_number: issue_number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+      - name: Use the labels
+        run: |
+          echo "Labels: ${{ steps.get_pr_labels.outputs.labels }}"
+          # You can now use the labels in your workflow
+          # For example, you can check if a specific label exists:
+          if [[ "${{ steps.get_pr_labels.outputs.labels }}" == "" ]]; then
+              echo "❌ Error: PR Label is missing. Please add a label to the PR."
+              exit 1
+          fi
