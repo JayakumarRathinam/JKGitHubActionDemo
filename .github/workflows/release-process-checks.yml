@@ -37,6 +37,8 @@ jobs:
               echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
           fi
   check-label:
+    needs:
+      - workflow-trigger
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
