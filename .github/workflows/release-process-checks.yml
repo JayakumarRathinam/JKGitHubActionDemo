@@ -34,16 +34,12 @@ jobs:
             else
               echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
           fi
-<<<<<<< HEAD
   check-PR-label:
     runs-on: ubuntu-latest
-=======
-  pr-label-enforcement:
-    needs [workflow-trigger]
-    strategy:
-      fail-fast: true    
-    runs-on: ubuntu-latest      
->>>>>>> fa1e87f (updated)
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensures full history       
     # Only check on PR open, sync, reopen, label, and unlabel. Don't check on reviews.
     if: github.event_name != 'pull_request_review' || github.event.review.state != 'submitted' || github.event.review.state != 'approved' 
     steps:
