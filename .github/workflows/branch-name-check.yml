@@ -1,8 +1,8 @@
 ---
 name: Enforce Branch Naming Convention
 on:
-  create:
-    branches: ['*']
+  #create:
+  #  branches: ['*']
 jobs:
   check_branch_name:
     runs-on: ubuntu-latest

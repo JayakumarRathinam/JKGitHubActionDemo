@@ -1,0 +1,50 @@
+---
+name: Release Management Process Checks
+on:
+  create:
+    branches: ['*']
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled] # Trigger on relevant PR events
+
+jobs:
+  check_branch_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensures full history        
+          
+      - name: Check branch name & Delete if not in Standard
+        run: >
+          branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          
+          echo "Branch Name: $branch_name"
+
+          if [[ ! "$branch_name" =~ ^(r|fb|hb|us)[0-9]+[-a-z]+$ ]]; then          
+            echo "❌ Error: Branch name '$branch_name' does not match the naming convention."
+              git push origin --delete $branch_name
+              exit 1
+            else
+              echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
+          fi
+  check-PR-label:
+    # Only check on PR open, sync, reopen, label, and unlabel. Don't check on reviews.
+    if: github.event_name != 'pull_request_review' || github.event.review.state != 'submitted' || github.event.review.state != 'approved' 
+    steps:
+      - name: Add a comment if label is missing
+        if: steps.check_label.outcome == 'failure'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const comment = `This PR requires the '${{ steps.check_label.outcome }}' label. Please add it to proceed with the merge.`;
+            await github.rest.issues.createComment({
+              issue_number: issue_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+              echo "❌" comment
+              exit 1
+            });

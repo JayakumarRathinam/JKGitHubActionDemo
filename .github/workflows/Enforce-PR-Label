@@ -1,8 +1,8 @@
 name: Enforce PR Label
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled] # Trigger on relevant PR events
+  #pull_request:
+  #  types: [opened, synchronize, reopened, labeled, unlabeled] # Trigger on relevant PR events
 
 jobs:
   check-label:
