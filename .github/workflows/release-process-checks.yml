@@ -29,6 +29,7 @@ jobs:
               echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
           fi
   check-PR-label:
+    runs-on: ubuntu-latest
     # Only check on PR open, sync, reopen, label, and unlabel. Don't check on reviews.
     if: github.event_name != 'pull_request_review' || github.event.review.state != 'submitted' || github.event.review.state != 'approved' 
     steps:
