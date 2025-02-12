@@ -1,6 +1,7 @@
 ---
 name: Enforce Branch Naming Convention
-#on:
+on:
+  workflow_dispatch:
   #create:
   #  branches: ['*']
 jobs:
