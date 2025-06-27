@@ -1,0 +1,16 @@
+name: Manual PR Title Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_title:
+        description: 'Pull Request Title'
+        required: true
+        type: string
+
+jobs:
+  run-with-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show PR Title Input
+        run: echo "Manually entered PR title: ${{ inputs.pr_title }}"
