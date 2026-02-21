@@ -1,0 +1,30 @@
+
+# intg_base_reference_cmn_load - Done
+# dbfs:/code/oztest/core_de/workflows/intg_base_reference_cmn_load/gold/sql/
+# dbfs:/code/oztest/core_de/workflows/intg_base_reference_cmn_load/gold/configurations/
+ 
+# intg_base_claim_cmn_load - Done
+# dbfs:/code/oztest/core_de/workflows/intg_base_claim_cmn_load/gold/sql/
+# dbfs:/code/oztest/core_de/workflows/intg_base_claim_cmn_load/gold/configurations/
+ 
+# intg_base_member_cmn_load - Done
+# dbfs:/code/oztest/core_de/workflows/intg_base_member_cmn_load/gold/sql/
+# dbfs:/code/oztest/core_de/workflows/intg_base_member_cmn_load/gold/configurations/
+ 
+# intg_base_priorauth_cmn_load - Done
+# dbfs:/code/oztest/core_de/workflows/intg_base_priorauth_cmn_load/gold/sql/
+# dbfs:/code/oztest/core_de/workflows/intg_base_priorauth_cmn_load/gold/configurations/
+ 
+# intg_base_provider_cmn_load - Done
+# dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/sql/
+# dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/configurations/
+
+
+---Listing Files
+dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/sql/')
+dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/configurations/')
+
+
+----Removing Files
+dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/sql/', True)
+dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/intg_base_provider_cmn_load/gold/configurations/', True)
