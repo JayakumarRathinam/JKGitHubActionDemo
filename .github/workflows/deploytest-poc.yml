@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show inputs
-        run: echo "PR number: ${{ inputs.pr_number }}"
+        run: |
+          echo "PR number: ${{ inputs.pr_number }}"
 
       - name: List files using gh
         env:
