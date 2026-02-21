@@ -1,0 +1,211 @@
+name: Deploytest
+
+on:
+  workflow_dispatch:
+    inputs:
+      workflow_title:
+        description: "Enter the workflow title value"
+        required: true
+        type: string  
+
+      pr_number:
+        description: "Pull Request number to deploy"
+        required: true
+        type: string
+
+      FullDeploy:
+        description: "Do you want fullcode Deployment"
+        required: true
+        type: boolean
+        default: false
+
+
+run-name: DeployTest ${{ github.event.inputs.workflow_title != '' && github.event.inputs.workflow_title || ' ' }}
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write        
+
+concurrency:
+  group: deploytest
+  cancel-in-progress: false
+  
+env:
+  PYPI_REPOSITORY_URL: https://pkgs.dev.azure.com/MyGainwell/629e4e20-d2c8-410c-85a5-52685caae3fe/_packaging/Acuity/pypi/upload
+  PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_PERSONAL_TOKEN }}
+  NOTEBOOK_DEPLOYMENT_PATH: 'Hedis'
+  GIT_NOTEBOOK_PATH: 'notebooks'
+ 
+jobs:
+  workflow-trigger:
+    if: github.event_name == 'workflow_dispatch'     
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow Triggered
+        run: echo "✅ workflow triggered successfully"
+
+  call-quality-checks:
+    needs: [workflow-trigger]
+    uses: ./.github/workflows/code-quality-assurance.yml
+    secrets:
+      pypi_url: ${{ secrets.AZURE_REPOSITORY_URL }}
+      secret_token: ${{ secrets.AZURE_PERSONAL_TOKEN }}
+
+  approve-test:
+    needs: [call-quality-checks]
+    runs-on: ubuntu-latest
+    environment:
+      name: approve-test
+    steps:
+      - run: echo "Waiting for approval"
+        shell: bash     
+
+  deploy-test:
+    name: Deploy to OZ TEST
+    needs: [approve-test]
+    strategy: 
+        fail-fast: false
+        matrix:
+          python-version: [3.11.13]
+          poetry-version: [2.1.3]
+          os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    environment:
+      name: oz_test_dev
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
+      SERVICE_PRINCIPAL_ID: ${{ secrets.HEDIS_DBX_SRVC_PRINCIPAL_ID }}
+      DATABRICKS_DOMAIN: ${{ secrets.DATABRICKS_DOMAIN }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-python@v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v3.0.2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: poetry Config
+        run: |
+          poetry config repositories.acuity ${{ env.PYPI_REPOSITORY_URL }}
+          poetry config http-basic.acuity __token__ ${{ env.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Install dependencies (including dbx)
+        run: |
+          poetry install
+          poetry add dbx
+
+      - name: Build Wheel file
+        run: |
+          python setup.py bdist_wheel
+ 
+      - name: Deploy Yaml config to dbfs
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
+                -n "${{ inputs.pr_number }}" && \
+                "${{ inputs.FullDeploy }}" != "true" ]]; then
+            echo "Deploying PR incremental changes"
+
+          - name: Checkout PR branch
+            uses: actions/checkout@v6.0.2
+            with:
+              ref: refs/pull/${{ inputs.pr_number }}/head
+              fetch-depth: 0    
+
+          - name: Get changed files from PR
+            if: inputs.pr_number != ''
+            id: pr_files
+            uses: actions/github-script@v7
+            with:
+              script: |
+                const prNumber = Number(core.getInput('pr_number'));
+                const files = await github.paginate(
+                  github.rest.pulls.listFiles,
+                  { owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber }
+                );
+                core.setOutput("files", files.map(f => f.filename).join("\n"));
+                CHANGED_FILES="${{ steps.pr_files.outputs.files }}"
+            # --------------------------------------------------
+            # Copy PR changed files
+            # --------------------------------------------------
+            if [[ -n "$CHANGED_FILES" ]]; then
+              echo "📦 Copying PR changed files to DBFS"
+
+              IFS=$'\n'
+              for file in $CHANGED_FILES; do
+                SRC="$GITHUB_WORKSPACE/$file"
+                DEST="dbfs:/code/dbx/hedis_de/dependencies/$file"
+
+                if [[ -e "$SRC" ]]; then
+                  echo "➡️ Copying: $file"
+
+                  # poetry run databricks fs mkdirs "$(dirname "$DEST")" || true
+                  # poetry run databricks fs cp -r "$SRC" "$DEST" --overwrite
+
+                  echo "✅ $file transferred successfully"
+                else
+                  echo "⚠️ Skipped (not present in PR workspace): $file"
+                fi
+              done
+            fi
+          else
+            echo "🔄 Full deploy requested — switching workspace to main branch"
+            git fetch origin main --quiet
+            git checkout origin/main --quiet
+            echo "✅ Workspace now aligned to main branch:"
+            git log -1 --oneline
+
+            DBFS_BASE="dbfs:/code/dbx/hedis_de/dependencies"
+            EXCLUDES_FILE="excludeindeploy.txt"
+            TEMP_DIR="/tmp/workspace_clean"
+
+            # Step 0: Clean temp dir
+              rm -rf "$TEMP_DIR"
+              mkdir -p "$TEMP_DIR"
+
+            # Step 1: Copy full workspace into temp dir
+            # Copy contents only, not the folder itself
+              cp -r "$GITHUB_WORKSPACE/." "$TEMP_DIR/"
+              echo "✅ Workspace copied to temp: $TEMP_DIR"
+
+            # Step 2: Read excludes and remove them from temp
+              mapfile -t EXCLUDES < "$EXCLUDES_FILE"
+              for ex in "${EXCLUDES[@]}"; do
+                [[ -n "$ex" ]] || continue   # skip empty lines
+                [[ "$ex" =~ ^# ]] && continue # skip comments
+                TARGET="$TEMP_DIR/$ex"
+                if [ -e "$TARGET" ]; then
+                  rm -rf "$TARGET"
+                  echo "🗑️ Removed excluded: $ex"
+                else
+                  echo "⚠️ Excluded path not found in workspace: $ex"
+                fi
+              done
+
+              # Step 3: Delete and recreate base directory in DBFS
+              poetry run databricks fs rm -r "$DBFS_BASE" || true
+              echo "❗ Dependency 📁 folder deleted."
+
+              poetry run databricks fs mkdirs "$DBFS_BASE"
+              echo "✅ Dependency 📁 folder created again."
+
+              # Step 4: Bulk copy cleaned workspace
+              poetry run databricks fs cp -r "$TEMP_DIR/" "$DBFS_BASE" --overwrite
+              echo "✅ Bulk copy completed from temp workspace."
+
+              TOTAL_COPIED=$(find "$TEMP_DIR" -type f | wc -l)
+              TOTAL_EXCLUDED=$(grep -vE '^\s*(#|$)' "$EXCLUDES_FILE" | wc -l)
+
+              echo "--------------------------------------------------"
+              echo "📊 Bulk Transfer Summary"
+              echo "✅ Workspace copied to DBFS: $DBFS_BASE"
+              echo "✅ Total files copied       : $TOTAL_COPIED"
+              echo "🚫 Exclusions applied      : $TOTAL_EXCLUDED (from $EXCLUDES_FILE)"
+              echo "--------------------------------------------------"
+            fi

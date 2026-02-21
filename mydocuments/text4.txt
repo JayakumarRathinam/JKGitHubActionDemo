@@ -1,0 +1,29 @@
+
+# qnxt_src_reference_load - Done
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_reference_load/silver/sql/
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_reference_load/silver/configurations/
+ 
+# qnxt_src_provider_load - Done
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_provider_load/silver/sql/
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_provider_load/silver/configurations/
+ 
+# qnxt_src_priorauth_load - Done
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_priorauth_load/silver/sql/
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_priorauth_load/silver/configurations/
+ 
+# qnxt_src_member_load - Done
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_member_load/silver/sql/
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_member_load/silver/configurations/
+ 
+# qnxt_src_claims_load - Done
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/sql/
+# dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/configurations/
+
+----Listing Files
+
+dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/sql/')
+dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/configurations/')
+
+----Removing Files
+dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/sql/', True)
+dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/configurations/', True)

@@ -1,0 +1,21 @@
+
+Hello @Jayakumar Rathinam,
+
+Please submit a service request in order to be added to one of the following groups for GitHub access. Include the group name (choose based on whether you need HMS or Gainwell GitHub access) and attach approval from the group owner.
+AAD-Application-GitHub-HMS-Legacy
+AAD-Application-GitHub Enterprise Managed Users
+
+Here is the link to submit the request:
+Group Access request (direct link to request form)
+Request access to a Gainwell Azure AD or On-prem AD group.
+https://gainwellnow.service-now.com/esc?id=sc_cat_item&sys_id=446379f187e85e102c4052083cbb352e&sysparm_category=e7ba98ad33a456106d8b16989d5c7b71
+
+To see a list of owners for group AAD-Application-GitHub-HMS-Legacy, use the link (log in with Gainwell credentials if prompted):
+https://portal.azure.com/#blade/Microsoft_AAD_IAM/GroupOwnersList.ReactView/query//groupId/707b35d1-1bb5-4b4b-bef4-837fadd10f10
+
+To see a list of owners for group AAD-Application-GitHub Enterprise Managed Users, use this link (log in with Gainwell credentials if prompted):
+https://portal.azure.com/#blade/Microsoft_AAD_IAM/GroupOwnersList.ReactView/query//groupId/f3f9b189-6029-4850-9658-0b42dd1c0f6c
+
+Regards,
+Lori Yacko
+Identity and Access Management
