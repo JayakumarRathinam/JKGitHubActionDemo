@@ -35,5 +35,8 @@ jobs:
             )
 
             # Use it later:
-            echo "Changed lines:"
-            printf '%s\n' "$changed_lines"
+
+            for file in "${changed_files[@]}"; do
+              echo "File: $file"
+            done
+
