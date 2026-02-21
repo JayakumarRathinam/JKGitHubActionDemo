@@ -6,7 +6,7 @@ on:
       pr_number:
         description: "Pull Request number"
         required: true
-        type: number
+        type: string   # ← important (number type sometimes passes empty)
 
 jobs:
   list-pr-files:
@@ -14,13 +14,21 @@ jobs:
 
     steps:
       - name: Get modified files in PR
+        id: get-files   # ← REQUIRED
         uses: actions/github-script@v8
         with:
           script: |
-            const prNumber = Number(core.getInput('pr_number'));
+            const prInput = core.getInput('pr_number');
 
-            if (!prNumber || prNumber <= 0) {
-              core.setFailed(`Invalid PR number: ${prNumber}`);
+            if (!prInput) {
+              core.setFailed("pr_number input missing");
+              return;
+            }
+
+            const prNumber = Number(prInput);
+
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              core.setFailed(`Invalid PR number: ${prInput}`);
               return;
             }
 
