@@ -3,11 +3,6 @@ name: Deploytest_POC
 on:
   workflow_dispatch:
     inputs:
-      workflow_title:
-        description: "Enter the workflow title value"
-        required: true
-        type: string  
-
       pr_number:
         description: "Pull Request number to deploy"
         required: true
@@ -18,9 +13,6 @@ on:
         required: true
         type: boolean
         default: false
-
-
-run-name: DeployTest ${{ github.event.inputs.workflow_title != '' && github.event.inputs.workflow_title || ' ' }}
 
 jobs:
   workflow-trigger:
@@ -52,17 +44,26 @@ jobs:
           ref: refs/pull/${{ inputs.pr_number }}/head
           fetch-depth: 0
       # Get PR changed files
-      - name: Get changed files from PR
-        if: inputs.pr_number != '' && !inputs.FullDeploy
-        id: pr_files
-        uses: actions/github-script@v8
+      - uses: actions/github-script@v8
         with:
           script: |
-            const prNumber = Number(core.getInput('pr_number'));
+            const prInput = core.getInput('pr_number');
+            if (!prInput) {
+              core.setFailed("pr_number input is required");
+              return;
+            }
+
+            const prNumber = Number(prInput);
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              core.setFailed(`Invalid PR number: ${prInput}`);
+              return;
+            }
+
             const files = await github.paginate(
               github.rest.pulls.listFiles,
               { owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber }
             );
+
             core.setOutput("files", files.map(f => f.filename).join("\n"));
       # ============================================
       # Deploy step (PR incremental OR full main)
