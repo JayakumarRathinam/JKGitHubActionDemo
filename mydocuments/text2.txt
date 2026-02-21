@@ -17,3 +17,6 @@ Chandrayaan-3 achieved a successful soft landing near the Moon’s south pole in
 Applications: Runs satellite systems for TV broadcasting, internet, GPS-like navigation (NavIC), remote sensing, and meteorology.
 
 In short: ISRO is a globally respected, cost-efficient space agency that designs rockets, launches satellites, and explores space while supporting everyday services in India.
+
+
+terrser

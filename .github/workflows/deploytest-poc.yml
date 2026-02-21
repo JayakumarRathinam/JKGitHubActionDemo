@@ -29,10 +29,9 @@ jobs:
             repo="${{ github.event.repository.name }}"
             pr="${{ inputs.pr_number }}"
 
-            changed_lines=$(
+            changed_files=$(
               gh pr view "$pr" --repo "$owner/$repo" --json files \
-                --jq '.files[] | [.path, .additions, .deletions] | @tsv' \
-              | awk -F'\t' '{printf "modified  %s (+%s/-%s)\n", $1, $2, $3}'
+                --jq '.files[].path'
             )
 
             # Use it later:
