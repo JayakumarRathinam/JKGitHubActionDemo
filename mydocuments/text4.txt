@@ -23,7 +23,3 @@
 
 dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/sql/')
 dbutils.fs.ls('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/configurations/')
-
-----Removing Files
-dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/sql/', True)
-dbutils.fs.rm('dbfs:/code/oztest/core_de/workflows/qnxt_src_claims_load/silver/configurations/', True)
