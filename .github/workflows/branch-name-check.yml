@@ -1,29 +1,35 @@
 name: Branch Name Validation
 
 on:
-  create:
   push:
+    branches-ignore:
+      - main
+      - development
+  create:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check branch name format
+      - name: Skip excluded branches for create event
         run: |
           BRANCH="${GITHUB_REF#refs/heads/}"
-          echo "Checking branch: $BRANCH"
 
-          # ✅ Exclude branches
           if [[ "$BRANCH" == "main" || "$BRANCH" == "development" ]]; then
-            echo "✅ Skipping validation for protected branch: $BRANCH"
+            echo "Skipping workflow for $BRANCH"
             exit 0
           fi
 
-          # ✅ Regex validation
+      - name: Validate branch name
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+
+          echo "Checking branch: $BRANCH"
+
           if [[ ! "$BRANCH" =~ ^(us[0-9]{6,}|r[0-9]{6,}|fb[0-9]{6,}|hb[0-9]{6,})(-tk[0-9]{6,})?(-[a-z0-9-]+)+$ ]]; then
-            echo "❌ Invalid branch name!"
+            echo "Invalid branch name!"
             exit 1
           fi
 
-          echo "✅ Valid branch name"
+          echo "Valid branch name"
