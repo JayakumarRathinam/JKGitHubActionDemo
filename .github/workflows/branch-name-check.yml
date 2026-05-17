@@ -1,28 +1,22 @@
----
-name: Enforce Branch Naming Convention
-on:
-  workflow_dispatch:
-  #create:
-  #  branches: ['*']
-jobs:
-  check_branch_name:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Ensures full history        
-          
-      - name: Check branch name & Delete if not in Standard
-        run: >
-          branch_name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-          
-          echo "Branch Name: $branch_name"
+name: Branch Name Validation
 
-          if [[ ! "$branch_name" =~ ^(r|fb|hb|us)[0-9]+[-a-z]+$ ]]; then          
-            echo "❌ Error: Branch name '$branch_name' does not match the naming convention."
-              git push origin --delete $branch_name
-              exit 1
-            else
-              echo "✅ Branch name '$branch_name' created & its match the naming convention, Proceed. "
+on:
+  create:
+  push:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "Checking branch: $BRANCH"
+
+          if [[ ! "$BRANCH" =~ ^(us[0-9]{6,}|r[0-9]{6,}|fb[0-9]{6,}|hb[0-9]{6,})(-tk[0-9]{6,})?(-[a-z0-9-]+)+$ ]]; then
+            echo "❌ Invalid branch name!"
+            exit 1
           fi
+
+          echo "✅ Valid branch name"
